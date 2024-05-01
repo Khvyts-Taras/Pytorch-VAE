@@ -30,21 +30,21 @@ class Encoder(nn.Module):
 	def __init__(self, latent_dim):
 		super(Encoder, self).__init__()
 		def _DownBlock(inp_n, out_n):
-			block = [nn.Conv2d(inp_n, out_n, kernel_size=3, stride=1, padding=1),
-					 nn.LeakyReLU(0.1),
-					 nn.MaxPool2d(2)]
+			block = nn.Sequential(nn.Conv2d(inp_n, out_n, kernel_size=3, stride=1, padding=1),
+					 			  nn.LeakyReLU(0.1),
+					 			  nn.MaxPool2d(2))
 
 			return block
 
 		self.encoder = nn.Sequential(
 			#3, 128, 128
-			*_DownBlock(3, 16),
+			_DownBlock(3, 16),
 			#16, 64, 64
-			*_DownBlock(16, 32),
+			_DownBlock(16, 32),
 			#32, 32, 32
-			*_DownBlock(32, 64),
+			_DownBlock(32, 64),
 			#64, 16, 16
-			*_DownBlock(64, 128),
+			_DownBlock(64, 128),
 			#128, 8, 8
 		)
 
@@ -64,8 +64,8 @@ class Decoder(nn.Module):
 	def __init__(self, latent_dim):
 		super(Decoder, self).__init__()
 		def _UpBlock(inp_n, out_n):
-			block = [nn.ConvTranspose2d(inp_n, out_n, kernel_size=4, stride=2, padding=1),
-					 nn.LeakyReLU(0.1)]
+			block = nn.Sequential(nn.ConvTranspose2d(inp_n, out_n, kernel_size=4, stride=2, padding=1),
+					 			  nn.LeakyReLU(0.1))
 
 			return block
 
@@ -75,13 +75,13 @@ class Decoder(nn.Module):
 
 			nn.Unflatten(1, (128, 8, 8)),
 			#128, 8, 8
-			*_UpBlock(128, 64),
+			_UpBlock(128, 64),
 			#64, 16, 16
-			*_UpBlock(64, 32),
+			_UpBlock(64, 32),
 			#32, 32, 32
-			*_UpBlock(32, 16),
+			_UpBlock(32, 16),
 			#16, 64, 64
-			*_UpBlock(16, 3),
+			_UpBlock(16, 3),
 			#3, 128, 128
 			nn.Tanh()
 		)
